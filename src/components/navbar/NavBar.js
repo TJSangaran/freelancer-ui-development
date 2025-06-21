@@ -13,15 +13,13 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import PaidIcon from '@mui/icons-material/Paid';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../../context/AuthContext';
 import { ListItemIcon } from '@mui/material';
 import Person from '@mui/icons-material/Person';
-import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import Transaction from './transaction';
 import Withdrawal from '../../pages/withdrawal';
@@ -150,12 +148,6 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 				</ListItemIcon>
 				Profile
 			</MenuItem>
-			<MenuItem>
-				<ListItemIcon>
-					<Settings fontSize="small" />
-				</ListItemIcon>
-				Settings
-			</MenuItem>
 			<MenuItem onClick={()=>setView(true)}>
 				<ListItemIcon>
 					<PublishedWithChangesIcon fontSize="small" />
@@ -195,11 +187,6 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 			onClose={handleMobileMenuClose}
 		>
 			<MenuItem>
-				<IconButton size="large" aria-label="show 4 new mails" color="inherit">
-					<Badge badgeContent={4} color="error">
-						<MailIcon />
-					</Badge>
-				</IconButton>
 				<p>Messages</p>
 			</MenuItem>
 			<MenuItem onClick={() => { setOpen(true) }}>
@@ -210,7 +197,7 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 				>
 					<Badge color="error">
 						{/* badgeContent={17} */}
-						<NotificationsIcon  />
+						<PaidIcon  />
 					</Badge>
 				</IconButton>
 				<p>Transactions</p>
@@ -271,11 +258,6 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 					</Search>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-						<IconButton size="large" aria-label="show 4 new mails" color="inherit">
-							<Badge badgeContent={4} color="error">
-								<MailIcon />
-							</Badge>
-						</IconButton>
 						<IconButton
 							size="large"
 							aria-label="show 17 new notifications"
@@ -283,7 +265,7 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 						>
 							<Badge color="error">
 								{/* badgeContent={17} */}
-								<NotificationsIcon onClick={() => { setOpen(true) }} />
+								<PaidIcon onClick={() => { setOpen(true) }} />
 							</Badge>
 						</IconButton>
 						<IconButton
