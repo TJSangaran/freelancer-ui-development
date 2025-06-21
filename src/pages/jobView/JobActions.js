@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import ReviewForm from "./ReviewForm";
+import { useToast } from "../../context/ToastContext";
 
 const actions = {
     errand: {
@@ -66,6 +67,7 @@ const actions = {
 function JobActions({ job, refreshData }) {
     const { user, customFetch } = useAuth();
     const isErrand = user.isErrand;
+    const { showToast } = useToast();
     const [reviewModal, setReviewModal] = useState(false);
 
     const updateOfferStatus = async ({ status }) => {
@@ -73,14 +75,23 @@ function JobActions({ job, refreshData }) {
             "Content-Type": "application/json",
         };
         const body = JSON.stringify({ status });
-        const response = await (
-            await customFetch(`/jobs/status/${job._id}`, {
-                method: "PUT",
-                headers,
-                body,
-            })
-        ).json();
-        refreshData();
+        try {
+            const response = await (
+                await customFetch(`/jobs/status/${job._id}`, {
+                    method: "PUT",
+                    headers,
+                    body,
+                })
+            ).json();
+            refreshData();
+        } catch (e) {
+            try {
+                const error = await e.json()
+                showToast(error.message, 'error')
+            } catch (e2) {
+                showToast('An unknown error occurred', 'error')
+            }
+        }
     };
 
     const closeReviewModal = () => {

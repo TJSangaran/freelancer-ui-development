@@ -22,14 +22,21 @@ const CustomAttachment = (props) => {
     const [job, setJob] = useState(null);
 
     useEffect(() => {
-        customFetch(`/jobs/${attachment.jobId}`)
+        const abortCont = new AbortController();
+        customFetch(`/jobs/${attachment.jobId}`, { signal: abortCont.signal })
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
                 setJob(data);
-            });
-    }, []);
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') {
+                    console.log('Fetch aborted');
+                }
+            })
+        return () => abortCont.abort();
+    }, [customFetch, attachment.jobId]);
     
     const repluJobOffer = async ({status}) =>{
         const headers = {

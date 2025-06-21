@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
     Card,
     Grid,
-    Pagination,
-    CardContent,
-    CardActions,
+    InputBase,
     Stack,
-    IconButton,
+    Pagination,
     Typography,
     TextField
-} from '@mui/material'
-import { makeStyles } from '@mui/styles';
-import SearchIcon from '@mui/icons-material/Search';
-import { red } from '@mui/material/colors';
+} from '@mui/material';
+import { makeStyles } from '@mui/styles'
+import SearchIcon from '@mui/icons-material/Search'
 import Errand from './Errand'
 import useFetch from '../../hooks/useFetch';
 
@@ -22,28 +19,24 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-
 const ErrandsList = () => {
-    const classes = useStyles()
     const [members, membersLoading] = useFetch('/errands')
+    const errandMembers = useMemo(() => members.filter(e => e.isErrand), [members])
     const [page, setPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage] = useState(10)
     const handleChange = (event, value) => {
         setPage(value);
     };
     const [search, setSearch] = useState('')
-    const [filterMembers, setFilterMembers] = useState(members)
-    const handleSearchChange = (e) => {
-        setSearch(e.target.value)
-    }
+    const [filterMembers, setFilterMembers] = useState([])
+    
     useEffect(() => {
         if (!!search) {
-            setFilterMembers(members.filter(member => (member.firstname).toLowerCase().match(search.toLowerCase()) || (member.lastname).toLowerCase().match(search.toLowerCase()) || (member.description).toLowerCase().match(search.toLowerCase())))
+            setFilterMembers(errandMembers.filter(member => (member.firstname).toLowerCase().match(search.toLowerCase()) || (member.lastname).toLowerCase().match(search.toLowerCase()) || (member.description).toLowerCase().match(search.toLowerCase())))
+        } else {
+            setFilterMembers(errandMembers)
         }
-        if (search === '') {
-            setFilterMembers(members)
-        }
-    }, [search, members])
+    }, [search, errandMembers])
 
     if (membersLoading) return 'loading...'
     return (
@@ -96,7 +89,7 @@ const ErrandsList = () => {
                 }
             </Grid>
             <Stack sx={{ p: 1, mt: 1, boxShadow: 2, backgroundColor: '#fff' }} alignItems='center'>
-                <Pagination count={Math.ceil(filterMembers.filter(e => e.isErrand).length / rowsPerPage)} page={page} onChange={handleChange} />
+                <Pagination count={Math.ceil(filterMembers.length / rowsPerPage)} page={page} onChange={handleChange} />
             </Stack>
         </React.Fragment>
     )

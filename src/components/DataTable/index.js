@@ -6,7 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Card from '@mui/material/Card';
-import { Container, Chip, Grid, Typography, TextField, FormControlLabel, Checkbox, TableFooter, FormGroup, Menu, MenuItem, Pagination, TablePagination, Divider } from '@mui/material';
+import { Container, Chip, Grid, Typography, TextField, Stack, CircularProgress, TableFooter, FormGroup, Menu, MenuItem, Pagination, TablePagination, Divider } from '@mui/material';
 import moment from 'moment';
 import VerticalSplitIcon from '@mui/icons-material/VerticalSplit';
 import { makeStyles } from "@mui/styles";
@@ -82,6 +82,7 @@ export default function DataTable({
     searchKeyWord = 'title',
     menu,
     hideSearch = false,
+    loading = false,
     ...rest
 }) {
     const classes = useStyles()
@@ -117,34 +118,32 @@ export default function DataTable({
     return (
         <Container {...rest}>
             <Card sx={{ mb: 2 }}>
-                <Grid container spacing={2} alignItems='center'>
-                    <Grid item xs={6} md={8} >
-                        <Typography variant='h5' sx={{ p: 2, borderRadius: 4 }} noWrap>
+                <Grid container spacing={2} alignItems='center' sx={{ p: 2, pr: 3 }}>
+                    <Grid item xs={12} md={6} >
+                        <Typography variant='h5' noWrap>
                             {tableHeading}
                         </Typography>
                     </Grid>
-                    {!hideSearch &&
-                        <Grid item xs={6} md={4} display="flex" justifyContent='flex-end'>
-                            <TextField
-                                type={'search'}
-                                variant="standard"
-                                placeholder={searchLabel}
-                                margin="normal"
-                                size='small'
-                                onChange={(e) => { setSearch(e.target.value) }}
-                                InputProps={{
-                                    disableUnderline: true,
-                                    endAdornment: <SearchIcon />
-                                }}
-                                sx={{ borderRadius: 2, p: 1, backgroundColor: '#eee', borderColor: 'none', mr: 1 }}
-                            />
-                        </Grid>
-                    }
-                    {menu &&
-                        <Grid item xs={6} md={4} display="flex" justifyContent='flex-end' pr={2}>
+                    <Grid item xs={12} md={6}>
+                        <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
+                            {!hideSearch &&
+                                <TextField
+                                    type={'search'}
+                                    variant="standard"
+                                    placeholder={searchLabel}
+                                    margin="none"
+                                    size='small'
+                                    onChange={(e) => { setSearch(e.target.value) }}
+                                    InputProps={{
+                                        disableUnderline: true,
+                                        endAdornment: <SearchIcon />
+                                    }}
+                                    sx={{ borderRadius: 2, p: 1, backgroundColor: '#eee', borderColor: 'none' }}
+                                />
+                            }
                             {menu}
-                        </Grid>
-                    }
+                        </Stack>
+                    </Grid>
                 </Grid>
             </Card>
             <TableContainer component={Card} sx={{ boxShadow: 2 }}>
@@ -153,7 +152,13 @@ export default function DataTable({
                         <React.Fragment>
                             <TableHeader columns={renderColumns} />
                             <TableBody>
-                                {data.length > 0 ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={columns?.length} align="center">
+                                            <CircularProgress />
+                                        </TableCell>
+                                    </TableRow>
+                                ) : data.length > 0 ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                     <TableRow
                                         key={index}
                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -202,7 +207,13 @@ export default function DataTable({
                         </React.Fragment>
                         :
                         <TableBody style={{ width: '100%' }}>
-                            {data.length > 0 ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={2} align="center">
+                                        <CircularProgress />
+                                    </TableCell>
+                                </TableRow>
+                            ) : data.length > 0 ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                 <React.Fragment key={index}>
                                     {
                                         renderColumns.map((column, id) => (
@@ -227,7 +238,7 @@ export default function DataTable({
                                     <TableRow ><TableCell colSpan={2} sx={{ p: 0 }}><Divider key={index} /></TableCell></TableRow>
                                 </React.Fragment>
                             ))
-                                : <TableRow><TableCell align='center' colSpan={columns?.length}>No records found</TableCell></TableRow>
+                                : <TableRow><TableCell align='center' colSpan={2}>No records found</TableCell></TableRow>
                             }
                         </TableBody>
                     }

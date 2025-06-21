@@ -28,9 +28,9 @@ const EditProfile = () => {
         setFieldValue('tags', tags)
     }
 
-    const { user: { firstname, lastname, phone, description, tags, dob, readyToWork, address: { street, city, town, country } }, customFetch, getUserInfo } = useAuth();
+    const { user: { firstname, lastname, phone, description, tags, dob, readyToWork, address: { street, city, town, country }, accountname, bankname, accountnumber }, customFetch, getUserInfo } = useAuth();
 
-    const initialValues = { firstname, lastname, phone, description, tags, street, town, city, country, dob: moment(dob).format('yyyy-DD-mm'), readyToWork }
+    const initialValues = { firstname, lastname, phone, description, tags, street, town, city, country, dob: dob ? moment(dob).format('YYYY-MM-DD') : '', readyToWork, accountname, bankname, accountnumber }
 
     const validationSchema = Yup.object().shape({
         firstname: Yup.string().required('Required'),
@@ -65,6 +65,9 @@ const EditProfile = () => {
                 description: values.description,
                 tags: values.tags,
                 dob: values.dob,
+                accountname: values.accountname,
+                bankname: values.bankname,
+                accountnumber: values.accountnumber,
             }
             customFetch('/user', {
                 method: 'PUT',
@@ -207,6 +210,39 @@ const EditProfile = () => {
                                         {...getFieldProps("country")}
                                         error={Boolean(touched.country && errors.country)}
                                         helperText={touched.country && errors.country}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        label="Bank Name"
+                                        variant="standard"
+                                        {...getFieldProps("bankname")}
+                                        error={Boolean(touched.bankname && errors.bankname)}
+                                        helperText={touched.bankname && errors.bankname}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        label="Account Name"
+                                        variant="standard"
+                                        {...getFieldProps("accountname")}
+                                        error={Boolean(touched.accountname && errors.accountname)}
+                                        helperText={touched.accountname && errors.accountname}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        label="Account Number"
+                                        variant="standard"
+                                        {...getFieldProps("accountnumber")}
+                                        error={Boolean(touched.accountnumber && errors.accountnumber)}
+                                        helperText={touched.accountnumber && errors.accountnumber}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>

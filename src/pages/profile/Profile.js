@@ -42,7 +42,7 @@ const Profile = () => {
             </Grid>
             <Typography gutterBottom variant="h4" component="div" sx={{ my: 2 }}>Jobs</Typography>
             <Stack spacing={2}>
-                {!profile.jobs.lenth && <Typography variant="body2" color="text.secondary">No jobs found</Typography>}
+                {!profile.jobs.length && <Typography variant="body2" color="text.secondary">No jobs found</Typography>}
                 {profile.jobs.map((job, id) => (
                     <Job key={id} job={job} isErrand={profile.isErrand} />
                 ))}

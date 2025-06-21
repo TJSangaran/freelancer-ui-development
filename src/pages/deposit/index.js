@@ -1,17 +1,15 @@
-import React, {useState, useEffect} from 'react'
-import { Card, Grid, Dialog, Typography, TextField, DialogTitle, Button, DialogActions } from '@mui/material'
+import React from 'react'
+import { Grid, Dialog, TextField, DialogTitle, Button, DialogActions } from '@mui/material'
 import * as Yup from 'yup';
 import { FormikProvider, useFormik, Form } from "formik";
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
-
-
-const Withdrawal = ({open, setOpen}) => {
+const Deposit = ({ open, setOpen }) => {
     const hanldeClose = () => {
         setOpen(false)
     }
-    const {user, customFetch} = useAuth()
+    const { user, customFetch } = useAuth()
     const { showToast } = useToast()
     const initialValues = {
         userId: user._id,
@@ -22,15 +20,14 @@ const Withdrawal = ({open, setOpen}) => {
         userId: Yup.string().required('Required'),
         amount: Yup.number().typeError('Not a valid number').positive('Not a valid number').required('Required')
     })
-    
+
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: initialValues,
         validationSchema: validationSchema,
         onSubmit: (values, { setSubmitting, resetForm }) => {
             setSubmitting(true)
-            console.log(values)
-            customFetch('/withdrawalRequests', {
+            customFetch('/transactions/deposit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values)
@@ -39,6 +36,7 @@ const Withdrawal = ({open, setOpen}) => {
                     if (response.ok) {
                         setSubmitting(false)
                         resetForm()
+                        showToast("Deposit successful", "success");
                     } else {
                         throw response;
                     }
@@ -54,23 +52,23 @@ const Withdrawal = ({open, setOpen}) => {
                 })
         }
     })
-    const { errors, touched, values, isSubmitting, setSubmitting, handleChange, handleSubmit, setFieldValue, getFieldProps, resetForm, setFieldError } = formik;
+    const { errors, touched, getFieldProps, handleSubmit, isSubmitting } = formik;
 
 
-    return(
-        <Dialog 
-            open={open} 
+    return (
+        <Dialog
+            open={open}
             onClose={hanldeClose}
             scroll="body"
             maxWidth="sm"
-            sx={{m: 1, p: 2}}
+            sx={{ m: 1, p: 2 }}
         >
             <DialogTitle>
-                Request for withdrawal
+                Deposit to your account
             </DialogTitle>
             <FormikProvider value={formik} >
-                <Form onSubmit={handleSubmit} sx={{ mt: 1}}>
-                    <Grid container spacing={2} sx={{p: 2}}>
+                <Form onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                    <Grid container spacing={2} sx={{ p: 2 }}>
                         <Grid item xs={12} >
                             <TextField
                                 size="small"
@@ -92,7 +90,7 @@ const Withdrawal = ({open, setOpen}) => {
                             sx={{ mb: 2 }}
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? 'Loading...' : 'Send'}
+                            {isSubmitting ? 'Loading...' : 'Deposit'}
                         </Button>
                     </DialogActions>
                 </Form>
@@ -100,4 +98,4 @@ const Withdrawal = ({open, setOpen}) => {
         </Dialog>
     )
 }
-export default Withdrawal
+export default Deposit; 

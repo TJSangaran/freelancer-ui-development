@@ -1,33 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Card,
   Grid,
   Pagination,
-  CardContent,
-  CardActions,
   Stack,
-  IconButton,
   Typography,
   TextField,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import SearchIcon from "@mui/icons-material/Search";
-import { red } from "@mui/material/colors";
 import Job from "./Job";
 import useFetch from "../../hooks/useFetch";
 
-const useStyles = makeStyles(() => ({
-  noBorder: {
-    borderRadius: 10,
-  },
-}));
-
 const JobPosts = () => {
-  const classes = useStyles();
   const [jobPosts, jobPostsLoading] = useFetch("/jobPosts");
   console.log(jobPosts);
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage] = useState(10);
   const handleChange = (event, value) => {
     setPage(value);
   };
@@ -59,7 +47,7 @@ const JobPosts = () => {
       <Card sx={{ mb: 2 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={7} md={8}>
-            <Typography variant="h5" sx={{ p: 2, borderRadius: 4 }} linkC>
+            <Typography variant="h5" sx={{ p: 2, borderRadius: 4 }}>
               Job Posts
             </Typography>
           </Grid>

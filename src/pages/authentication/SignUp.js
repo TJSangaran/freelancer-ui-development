@@ -24,11 +24,9 @@ const SignUp = () => {
     const navigate = useNavigate()
     const [err, setErr] = useState('')
 
-    const handleTagChange = tags => {
-        setFieldValue('tags', tags)
-    }
-
-    const initialValues = {
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: {
         firstName: '',
         lastName: '',
         email: '',
@@ -47,9 +45,8 @@ const SignUp = () => {
         bankName: '',
         isErrand: true,
         readyToWork: true,
-    }
-
-    const validationSchema = Yup.object().shape({
+        },
+        validationSchema: Yup.object().shape({
         firstName: Yup.string().required('Required'),
         lastName: Yup.string().required('Required'),
         email: Yup.string()
@@ -72,12 +69,7 @@ const SignUp = () => {
                 "Please choose a valid date of birth",
                 (date) => moment().diff(moment(date), "years") >= 18
             ),
-    })
-
-    const formik = useFormik({
-        enableReinitialize: true,
-        initialValues: initialValues,
-        validationSchema: validationSchema,
+        }),
         onSubmit: (values, { setSubmitting }) => {
             setSubmitting(true)
             const data = {
@@ -117,7 +109,12 @@ const SignUp = () => {
                 })
         }
     })
+    
     const { errors, touched, values, isSubmitting, setSubmitting, handleChange, handleSubmit, setFieldValue, getFieldProps, resetForm, setFieldError } = formik;
+    
+    const handleTagChange = tags => {
+        setFieldValue('tags', tags)
+    }
 
     const handleTypeChange = isErrand => {
         setFieldValue('isErrand', isErrand)
@@ -128,34 +125,10 @@ const SignUp = () => {
             <Typography component="h1" variant="h5">
                 Sign up
             </Typography>
-            <FormikProvider value={formik} >
+            <FormikProvider value={formik}>
                 <Form onSubmit={handleSubmit} sx={{ mt: 1 }}>
                     <Grid container spacing={2} sx={{ pt: 2 }}>
                         {!!err && <Alert color='error'>{err}</Alert>}
-                        {/* <Grid item xs={12} sm={6} >
-                            <TextField
-                                
-                                select
-                                size="small"
-                                fullWidth
-                                //id="type"
-                                label="Type"
-                                autoFocus
-                                variant="standard"
-                                {...getFieldProps("type")}
-                                error={Boolean(touched.type && errors.type)}
-                                helperText={touched.type && errors.type}
-                                defaultValue='errand'
-                            >
-                                {
-                                    [{value: 'errand', label: 'Errand'}, {value: 'poster', label: 'Poster'}].map(({value, label})=>(
-                                        <MenuItem value={value} key={value}>
-                                            {label}
-                                        </MenuItem>
-                                    ))
-                                }
-                            </TextField>
-                        </Grid> */}
                         <Grid item xs={12} sm={6} >
                             <Button fullWidth variant={values.isErrand ? 'contained' : 'outlined'} onClick={() => handleTypeChange(true)}>Errand</Button>
                         </Grid>
@@ -266,13 +239,12 @@ const SignUp = () => {
                             <TextField
                                 size="small"
                                 fullWidth
-                                type='date'
-                                label="DOB"
-                                //name="dob"
+                                label="Bank Name"
+                                //name="bankName"
                                 variant="standard"
-                                {...getFieldProps("dob")}
-                                error={Boolean(touched.dob && errors.dob)}
-                                helperText={touched.dob && errors.dob}
+                                {...getFieldProps("bankName")}
+                                error={Boolean(touched.bankName && errors.bankName)}
+                                helperText={touched.bankName && errors.bankName}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -299,26 +271,45 @@ const SignUp = () => {
                                 helperText={touched.accountNumber && errors.accountNumber}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={12}>
+                            <TagField onTagChange={handleTagChange} />
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
                             <TextField
                                 size="small"
+                                multiline
+                                rows={7}
                                 fullWidth
-                                label="Bank Name"
-                                //name="bankName"
+                                label="Description"
+                                //name="description"
                                 variant="standard"
-                                {...getFieldProps("bankName")}
-                                error={Boolean(touched.bankName && errors.bankName)}
-                                helperText={touched.bankName && errors.bankName}
+                                {...getFieldProps("description")}
+                                error={Boolean(touched.description && errors.description)}
+                                helperText={touched.description && errors.description}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 size="small"
                                 fullWidth
-                                //name="password"
+                                type='date'
+                                label="DOB"
+                                //name="dob"
+                                variant="standard"
+                                {...getFieldProps("dob")}
+                                error={Boolean(touched.dob && errors.dob)}
+                                helperText={touched.dob && errors.dob}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6} />
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                size="small"
+                                fullWidth
+                                //id="password"
                                 label="Password"
                                 type="password"
-                                //id="password"
+                                //name="password"
                                 variant="standard"
                                 {...getFieldProps("password")}
                                 error={Boolean(touched.password && errors.password)}
@@ -329,38 +320,17 @@ const SignUp = () => {
                             <TextField
                                 size="small"
                                 fullWidth
-                                //name="conPassword"
                                 label="Confirm Password"
                                 type="password"
-                                //id="conPassword"
+                                //name="conPassword"
                                 variant="standard"
                                 {...getFieldProps("conPassword")}
                                 error={Boolean(touched.conPassword && errors.conPassword)}
                                 helperText={touched.conPassword && errors.conPassword}
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                size="small"
-                                multiline
-                                rows={3}
-                                fullWidth
-                                //id="description"
-                                label="Description"
-                                //name="description"
-                                variant="standard"
-                                {...getFieldProps("description")}
-                                error={Boolean(touched.description && errors.description)}
-                                helperText={touched.description && errors.description}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={12}>
-                            <TagField
-                                onTagChange={handleTagChange}
-                                tags={values.tags}
-                            />
-                        </Grid>
                     </Grid>
+
                     <Button
                         type="submit"
                         fullWidth
@@ -368,14 +338,9 @@ const SignUp = () => {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Loading...' : 'Sign Up'}
+                        Sign Up
                     </Button>
-                    <Grid
-                        container
-                        direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                    >
+                    <Grid container justifyContent="flex-end">
                         <Grid item>
                             <Link to="/auth/signin" variant="body2">
                                 Already have an account? Sign in
@@ -387,4 +352,5 @@ const SignUp = () => {
         </React.Fragment>
     )
 }
-export default SignUp
+
+export default SignUp;

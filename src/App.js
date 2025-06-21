@@ -5,7 +5,7 @@ import './App.css';
 
 function App() {
 	const { loginStatus, user } = useAuth()
-	const Router = loginStatus ? <Routes type={user.isErrand} /> : <AuthRoutes />
+	const Router = loginStatus && user ? <Routes type={user.isErrand} /> : <AuthRoutes />
 	return (
 		<React.Fragment>
 			{Router}

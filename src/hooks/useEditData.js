@@ -25,7 +25,7 @@ const useEditData = (url, callback) => {
                 }
             });
         return () => abortCont.abort();
-    }, [url]);
+    }, [url, customFetch, callback]);
 }
 
 export default useEditData;

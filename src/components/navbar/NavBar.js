@@ -16,17 +16,9 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
-
-import Fab from '@mui/material/Fab';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import NavigationIcon from '@mui/icons-material/Navigation';
-
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../../context/AuthContext';
-
 import { ListItemIcon } from '@mui/material';
 import Person from '@mui/icons-material/Person';
 import Settings from '@mui/icons-material/Settings';
@@ -34,6 +26,9 @@ import Logout from '@mui/icons-material/Logout';
 import Transaction from './transaction';
 import Withdrawal from '../../pages/withdrawal';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
+import Deposit from '../../pages/deposit';
+import { Button } from '@mui/material';
+import { Stack } from '@mui/material';
 
 const Search = styled('div')(({ theme }) => ({
 	position: 'relative',
@@ -77,11 +72,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 	const [open, setOpen] = useState(false)
 	const [view, setView] = useState(false)
-	const { logout } = useAuth()
+	const { logout, user } = useAuth()
 	const theme = useTheme();
 	const isDownSm = useMediaQuery(theme.breakpoints.up('md'))
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+	const [openDeposit, setOpenDeposit] = useState(false);
 
 	const isMenuOpen = Boolean(anchorEl);
 	const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -102,6 +98,14 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 	const handleMobileMenuOpen = (event) => {
 		setMobileMoreAnchorEl(event.currentTarget);
 	};
+
+	const handleWithdrawal = () => {
+		setOpen(true)
+	}
+
+	const handleDeposit = () => {
+		setOpenDeposit(true)
+	}
 
 	const menuId = 'primary-search-account-menu';
 	const renderMenu = (
@@ -140,7 +144,6 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 			transformOrigin={{ horizontal: 'right', vertical: 'top' }}
 			anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
 		>
-
 			<MenuItem component={Link} to="/profile">
 				<ListItemIcon>
 					<Person fontSize="small" />
@@ -159,6 +162,12 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 				</ListItemIcon>
 				Withdrawal Request
 			</MenuItem>
+			{!user.isErrand && <MenuItem onClick={handleDeposit}>
+				<ListItemIcon>
+					<PublishedWithChangesIcon fontSize="small" />
+				</ListItemIcon>
+				Deposit
+			</MenuItem>}
 			<MenuItem onClick={logout}>
 				<ListItemIcon>
 					<Logout fontSize="small" />
@@ -260,29 +269,6 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 							inputProps={{ 'aria-label': 'search' }}
 						/>
 					</Search>
-					{isDownSm &&
-						<React.Fragment>
-							<Box sx={{ flexGrow: 0.1 }} />
-							<Box sx={{ '& > :not(style)': { m: 1 } }}>
-								<Fab size="small" aria-label="add">
-									<AddIcon />
-								</Fab>
-								<Fab size="small" aria-label="edit">
-									<EditIcon />
-								</Fab>
-								<Fab size="small" >
-									<NavigationIcon />
-								</Fab>
-								{/* <Fab variant="extended">
-								<NavigationIcon sx={{ mr: 1 }} />
-								Navigate
-							</Fab> */}
-								<Fab size="small" aria-label="like">
-									<FavoriteIcon />
-								</Fab>
-							</Box>
-						</React.Fragment>
-					}
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ display: { xs: 'none', md: 'flex' } }}>
 						<IconButton size="large" aria-label="show 4 new mails" color="inherit">
@@ -331,6 +317,7 @@ export default function NavBar({ drawerWidth, handleDrawerToggle }) {
 			{renderMenu}
 			<Transaction open={open} setOpen={setOpen} />
 			<Withdrawal open={view} setOpen={setView} />
+			<Deposit open={openDeposit} setOpen={setOpenDeposit} />
 		</Box>
 	);
 }

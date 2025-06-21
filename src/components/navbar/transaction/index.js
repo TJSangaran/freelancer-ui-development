@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 import DataTable from '../../DataTable'
 import useFetch from '../../../hooks/useFetch'
 import { Card, Stack, Dialog, Typography } from '@mui/material'
@@ -12,7 +12,8 @@ const columns= [
     },
     {
         name: 'ammount',
-        label: 'Amount'
+        label: 'Amount',
+        render: (row) => row.ammount
     },
     {
         name: 'createdAt',
@@ -28,19 +29,12 @@ const columns= [
 
 const Transaction = ({ open, setOpen}) => {
     const {user} = useAuth()
-    const [transactions, transactionsLoading] = useFetch(`/transaction/user/${user._id}`)
+    const [transactions, transactionsLoading] = useFetch(`/transactions/user/${user._id}`)
 
     const hanldeClose = () => {
         setOpen(false)
     }
-    const [currentBalance, setCurrentBalance] = useState(0)
-    useEffect(()=>{
-        let sum = transactions.reduce(function (accumulator, curValue) {
-            return accumulator + curValue.ammount
         
-        }, 0)
-        setCurrentBalance(sum)
-    },[transactions])
     if(transactionsLoading) return 'Loading...'
     return(
         <Dialog 
@@ -50,6 +44,7 @@ const Transaction = ({ open, setOpen}) => {
             maxWidth="lg"
             sx={{m: 1}}
         >
+            <div>
             <DataTable 
                 rows={transactions || []}
                 columns={columns}
@@ -65,11 +60,12 @@ const Transaction = ({ open, setOpen}) => {
                     </Typography>
                     <Typography>
                         {
-                            currentBalance
+                                user.balance || 0
                         }
                     </Typography>
                 </Stack>
             </Card>
+            </div>
         </Dialog>
     )
 }

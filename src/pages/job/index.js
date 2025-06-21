@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import DataTable from '../../components/DataTable'
 import useFetch from '../../hooks/useFetch'
-import { Chip, Button, Fab } from '@mui/material'
+import { Chip, Button, Fab, Select, MenuItem, FormControl, InputLabel } from '@mui/material'
 import { useAuth } from "../../context/AuthContext";
 import { Link } from 'react-router-dom';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+
+const jobStatuses = ["all", "initiated", "cancelled", "accecpted", "denied", "completeRequested", "completed"];
 
 const columns = [
     {
@@ -56,14 +58,49 @@ const columns = [
 const Job = () => {
     const { user } = useAuth();
     const [jobs, jobsLoading] = useFetch(`/jobs/${user.isErrand ? "errand" : "jobPoster"}/${user._id}`)
+    const [filteredJobs, setFilteredJobs] = useState([]);
+    const [status, setStatus] = useState('all');
 
-    if (jobsLoading) return 'Loading...'
+    useEffect(() => {
+        if (jobs) {
+            if (status === 'all') {
+                setFilteredJobs(jobs);
+            } else {
+                setFilteredJobs(jobs.filter(job => job.status === status));
+            }
+        }
+    }, [jobs, status]);
+
+    const handleStatusChange = (event) => {
+        setStatus(event.target.value);
+    };
+
+    const statusFilter = (
+        <FormControl variant="outlined" sx={{ minWidth: 150 }} size="small">
+            <InputLabel>Status</InputLabel>
+            <Select
+                value={status}
+                onChange={handleStatusChange}
+                label="Status"
+            >
+                {jobStatuses.map((s) => (
+                    <MenuItem key={s} value={s} sx={{ textTransform: 'capitalize' }}>
+                        {s}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+    );
+
     return (
         <DataTable
-            rows={jobs}
+            rows={filteredJobs}
+            loading={jobsLoading}
             columns={columns}
             tableHeading='Jobs'
             searchLabel='Search title...'
+            searchKeyWord='title'
+            menu={statusFilter}
         />
     )
 }

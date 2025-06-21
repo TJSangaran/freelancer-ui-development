@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 // import PageSkeletonLoader from 'components/Loader/SkeltonLoader/PageSkeletonLoader';
 import jwt_decode from "jwt-decode";
@@ -39,11 +39,55 @@ export function AuthProvider({ children }) {
 
   const navigate = useNavigate();
 
+  const navigateToLogin = useCallback((msg) => {
+    if (!path.startsWith("/auth")) {
+      navigate(`/auth/signin/${msg}?from=${path}`);
+    }
+  }, [navigate, path]);
+
+  const tokenRefresh = useCallback(async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (checkTokenValidity(refreshToken)) {
+      return fetch(process.env.REACT_APP_API_HOST + `/auth/refreshToken`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      })
+        .then((response) => {
+          if (response.status === 401) {
+            throw Error("Token Expired");
+          } else {
+            return response.json();
+          }
+        })
+        .then((data) => {
+          if (data.accessToken) {
+            setToken(data.accessToken);
+          }
+          return data.accessToken;
+        })
+        .catch((e) => {
+          setIsLoading(true);
+          navigateToLogin("expired");
+          setLoginStatus(false);
+          setUser(null);
+          setIsLoading(false);
+          throw e;
+        });
+    } else {
+      setIsLoading(true);
+      navigateToLogin("expired");
+      setLoginStatus(false);
+      setUser(null);
+      setIsLoading(false);
+    }
+  }, [navigateToLogin]);
+
   // useEffect(() => {
   //     localStorage.setItem('user', JSON.stringify(user));
   // }, [user]);
 
-  const getUserInfo = () => {
+  const getUserInfo = useCallback(() => {
     fetch(process.env.REACT_APP_API_HOST + "/user/me", {
       method: "GET",
       headers: { Authorization: "Bearer " + token },
@@ -66,7 +110,7 @@ export function AuthProvider({ children }) {
         setUser(null);
         setIsLoading(false);
       });
-  };
+  }, [navigateToLogin, token]);
 
   useEffect(() => {
     localStorage.setItem("token", token || "");
@@ -82,7 +126,7 @@ export function AuthProvider({ children }) {
       navigateToLogin("notLogged");
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, getUserInfo, navigateToLogin, tokenRefresh]);
 
   function customFetch(url, { method = "GET", headers = {}, ...rest } = {}) {
     if (checkTokenValidity(token)) {
@@ -164,44 +208,6 @@ export function AuthProvider({ children }) {
       });
   }
 
-  async function tokenRefresh() {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (checkTokenValidity(refreshToken)) {
-      return fetch(process.env.REACT_APP_API_HOST + `/auth/refreshToken`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      })
-        .then((response) => {
-          if (response.status === 401) {
-            throw Error("Token Expired");
-          } else {
-            return response.json();
-          }
-        })
-        .then((data) => {
-          if (data.accessToken) {
-            setToken(data.accessToken);
-          }
-          return data.accessToken;
-        })
-        .catch((e) => {
-          setIsLoading(true);
-          navigateToLogin("expired");
-          setLoginStatus(false);
-          setUser(null);
-          setIsLoading(false);
-          throw e;
-        });
-    } else {
-      setIsLoading(true);
-      navigateToLogin("expired");
-      setLoginStatus(false);
-      setUser(null);
-      setIsLoading(false);
-    }
-  }
-
   function logout() {
     navigateToLogin("loggedOut");
     setUser(null);
@@ -210,12 +216,6 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("refreshToken");
     // toastMessage("Logged out successfully")
     return true;
-  }
-
-  function navigateToLogin(msg) {
-    if (!path.startsWith("/auth")) {
-      navigate(`/auth/signin/${msg}?from=${path}`);
-    }
   }
 
   function checkTokenValidity(token) {
@@ -248,8 +248,6 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {isLoading ? loading : children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
   );
 }

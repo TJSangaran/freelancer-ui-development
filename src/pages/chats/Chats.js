@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import streamClient from "../../utils/streamClient";
+import React, { useEffect, useState, useMemo } from "react";
 import {
     Chat,
     Channel,
@@ -19,31 +18,52 @@ import ChannelHandler from "../../utils/channelHandler";
 import ChatListPreview from "../../components/chat/ChatListPreview";
 import CustomChannelHeader from "../../components/chat/CustomChannelHeader";
 import CustomEmptyStateIndicator from "../../components/chat/CustomEmptyStateIndicator";
-import { Modal, Tooltip, IconButton } from "@mui/material";
+import { Modal, Tooltip, IconButton, Box } from "@mui/material";
 import NewJob from "./NewJob";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import { getStreamClient } from "../../utils/streamClient";
 
 const Chats = () => {
     const [chatClient, setChatClient] = useState(null);
-    const [channels, setChannels] = useState(null);
     const [showJobModal, setShowJobModal] = useState(false);
     const { user, customFetch } = useAuth();
-    const client = new streamClient(user._id, user.firstname);
-    const filters = { type: "messaging", members: { $in: [user._id] } };
-    const sort = { last_message_at: -1 };
     const { id: receiverId } = useParams();
-    const channelHandler = new ChannelHandler(user, receiverId);
+
+    const channelHandler = useMemo(
+        () => (user && receiverId ? new ChannelHandler(user, receiverId) : null),
+        [user, receiverId]
+    );
+    const filters = useMemo(
+        () => (user ? { type: "messaging", members: { $in: [user._id] } } : null),
+        [user]
+    );
+    const sort = useMemo(() => ({ last_message_at: -1 }), []);
 
     useEffect(() => {
-        const initChat = async () => {
+        let client;
+        const initClient = async () => {
+            if (!user?._id || !user?.firstname) return;
+            try {
+                const token = localStorage.getItem("streamToken");
+                client = await getStreamClient(user._id, user.firstname, token);
+                setChatClient(client);
+
+                if (channelHandler) {
             await channelHandler.getChannel(client, customFetch);
-            const channelResponse = await client.queryChannels(filters, sort);
-            setChannels(channelResponse);
-            setChatClient(client);
+                }
+            } catch (error) {
+                console.error("Failed to connect chat client:", error);
+            }
         };
 
-        initChat();
-    }, []);
+        initClient();
+
+        return () => {
+            if (client) {
+                client.disconnectUser();
+            }
+        };
+    }, [user, channelHandler, customFetch]);
 
     const MenuIcon = () => (
         <IconButton
@@ -56,7 +76,7 @@ const Chats = () => {
         </IconButton>
     );
 
-    if (!chatClient) {
+    if (!chatClient || !filters) {
         return <LoadingIndicator />;
     }
 
@@ -71,7 +91,9 @@ const Chats = () => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
+            <Box>
             <NewJob closeJobModal={closeJobModal} />
+            </Box>
         </Modal>
     );
 
@@ -83,7 +105,7 @@ const Chats = () => {
                     Preview={ChatListPreview}
                     filters={filters}
                     sort={sort}
-                    customActiveChannel={channelHandler.id}
+                    customActiveChannel={channelHandler?.id}
                 />
                 <Channel Attachment={CustomAttachment}>
                     <Window>
